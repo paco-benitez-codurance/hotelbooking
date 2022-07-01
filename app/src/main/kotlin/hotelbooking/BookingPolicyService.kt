@@ -1,6 +1,6 @@
 package hotelbooking
 
-class BookingPolicyService<CompanyId, RoomTypes, RoomType, EmployeeId> {
+class BookingPolicyService<CompanyId, RoomTypes, RoomType> {
     fun setCompanyPolicy(companyId: CompanyId, roomTypes: RoomTypes) {
         TODO()
     }

@@ -1,6 +1,6 @@
 package hotelbooking
 
-class CompanyService<CompanyId, EmployeeId> {
+class CompanyService<CompanyId> {
     fun addEmployee(companyId: CompanyId, employeeId: EmployeeId) {
         TODO()
     }

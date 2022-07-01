@@ -1,7 +1,9 @@
 package hotelbooking
 
-class BookingService<EmployeeId, HotelId, RoomType, Date, Booking> {
-    fun book(employeeId: EmployeeId, hotelId: HotelId, roomType: RoomType, checkIn: Date, checkOut: Date): Booking {
+import java.time.LocalDate
+
+class BookingService {
+    fun book(employeeId: EmployeeId, hotelId: HotelId, roomType: RoomType, checkIn: LocalDate, checkOut: LocalDate): Booking {
         TODO()
     }
 }
