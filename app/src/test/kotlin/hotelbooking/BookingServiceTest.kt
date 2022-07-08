@@ -1,12 +1,16 @@
 package hotelbooking
 
+import io.mockk.every
+import io.mockk.mockk
+import io.mockk.verify
 import java.time.LocalDate
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFailsWith
 
 /*
 - [X] Booking should contain a unique ID, employeeId, hotelId, roomType, checkIn and checkOut.
-- [ ] Check out date must be at least one day after the check in date.
+- [X] Check out date must be at least one day after the check in date.
 - [ ] Validate if the hotel exists and room type is provided by the hotel
 - [ ] Verify if booking is allowed according to the booking policies defined, if any. See Booking Policy Service for more details.
 - [ ] Booking should only be allowed if there is at least one room type available during the whole booking period.
@@ -14,9 +18,6 @@ import kotlin.test.assertEquals
 - [ ] Hotel rooms can be booked many times as long as there are no conflicts with the dates.
 - [ ] Return booking confirmation to the employee or error otherwise (exceptions can also be used).
  */
-
-
-
 
 class BookingServiceTest {
     companion object {
@@ -27,26 +28,37 @@ class BookingServiceTest {
         private val ROOM_TYPE = RoomType()
     }
 
+    private val dateValidator = mockk<CheckDateValidator>()
+    private val bookingService = BookingService(dateValidator)
+
     @Test
-    fun bookingService_should_returnBookingObject() {
-        val bookingService = BookingService()
+    fun should_returnBookingObject() {
+        every { dateValidator.isValid(CHECKIN_DATE, CHECKOUT_DATE) }.returns(true)
 
         val booking = bookingService.book(
-            EMPLOYEE_ID,
-            HOTEL_ID,
-            ROOM_TYPE,
-            CHECKIN_DATE,
-            CHECKOUT_DATE
+            EMPLOYEE_ID, HOTEL_ID, ROOM_TYPE, CHECKIN_DATE, CHECKOUT_DATE
         )
 
         assertEquals(
             booking, Booking(
-                EMPLOYEE_ID,
-                HOTEL_ID,
-                ROOM_TYPE,
-                CHECKIN_DATE,
-                CHECKOUT_DATE
+                EMPLOYEE_ID, HOTEL_ID, ROOM_TYPE, CHECKIN_DATE, CHECKOUT_DATE
             )
         )
     }
+
+    @Test
+    fun exceptionShouldBeThrown_when_checkDateFails() {
+        every { dateValidator.isValid(CHECKIN_DATE, CHECKOUT_DATE) }.returns(false)
+
+        assertFailsWith<WrongDates> {
+            bookingService.book(
+                EMPLOYEE_ID, HOTEL_ID, ROOM_TYPE, CHECKIN_DATE, CHECKOUT_DATE
+            )
+        }
+
+        verify { dateValidator.isValid(CHECKIN_DATE, CHECKOUT_DATE) }
+
+
+    }
+
 }
