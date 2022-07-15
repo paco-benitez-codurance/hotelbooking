@@ -16,14 +16,24 @@ class BookingService(private val dateValidator: CheckDateValidator, private val 
         checkIn: LocalDate,
         checkOut: LocalDate
     ): Booking {
-        if (!dateValidator.isValid(checkIn, checkOut)) {
-            throw WrongDates()
-        }
+
+        validateDates(checkIn, checkOut)
+        validateHotelAndRoomType(hotelId, roomType)
+
+        return Booking(employeeId, hotelId, roomType, checkIn, checkOut)
+    }
+
+    private fun validateHotelAndRoomType(hotelId: HotelId, roomType: RoomType) {
         val hotel = hotelService.findHotelBy(hotelId)
         if (!hotel.has(roomType)) {
             throw RoomTypeNotFound()
         }
-        return Booking(employeeId, hotelId, roomType, checkIn, checkOut)
+    }
+
+    private fun validateDates(checkIn: LocalDate, checkOut: LocalDate) {
+        if (!dateValidator.isValid(checkIn, checkOut)) {
+            throw WrongDates()
+        }
     }
 
 }
