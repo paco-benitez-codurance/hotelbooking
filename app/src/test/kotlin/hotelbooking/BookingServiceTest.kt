@@ -1,5 +1,9 @@
 package hotelbooking
 
+import hotelbooking.errors.HotelNotFound
+import hotelbooking.errors.RoomTypeNotFound
+import hotelbooking.errors.WrongDates
+import hotelbooking.model.*
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
@@ -28,7 +32,6 @@ class BookingServiceTest {
         private val EMPLOYEE_ID = EmployeeId()
         private val HOTEL_ID = HotelId("id1")
         private val ROOM_TYPE = RoomType()
-        private const val HOTEL_NAME = "A Hotel Name"
     }
 
     private val dateValidator = mockk<CheckDateValidator>()
@@ -39,7 +42,11 @@ class BookingServiceTest {
     @Before
     fun setUp() {
         every { dateValidator.isValid(CHECKIN_DATE, CHECKOUT_DATE) }.returns(true)
-        every { hotelService.findHotelBy(HOTEL_ID) } returns Hotel()
+
+        val hotel = mockk<Hotel>()
+        every { hotel.has(ROOM_TYPE) } returns true
+        every { hotelService.findHotelBy(HOTEL_ID) } returns hotel
+
 
         bookingService = BookingService(dateValidator, hotelService)
     }
@@ -74,7 +81,7 @@ class BookingServiceTest {
     }
 
     @Test
-    fun validateIfHotelAndRoomTypeAreProvidedByTheHotel() {
+    fun exception_when_hotelIsNotFound() {
         val nonExistingHotelId = HotelId("nonExistingId")
 
         every { hotelService.findHotelBy(nonExistingHotelId) } throws HotelNotFound()
@@ -82,6 +89,19 @@ class BookingServiceTest {
         assertFailsWith<HotelNotFound> {
             bookingService.book(
                 EMPLOYEE_ID, nonExistingHotelId, ROOM_TYPE, CHECKIN_DATE, CHECKOUT_DATE
+            )
+        }
+    }
+
+    @Test
+    fun exception_when_roomTypeIsNotFound() {
+        val hotel = mockk<Hotel>()
+        every { hotel.has(ROOM_TYPE) } returns false
+        every { hotelService.findHotelBy(HOTEL_ID) } returns hotel
+
+        assertFailsWith<RoomTypeNotFound> {
+            bookingService.book(
+                EMPLOYEE_ID, HOTEL_ID, ROOM_TYPE, CHECKIN_DATE, CHECKOUT_DATE
             )
         }
     }

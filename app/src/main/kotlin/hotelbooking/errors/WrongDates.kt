@@ -1,4 +1,4 @@
-package hotelbooking
+package hotelbooking.errors
 
 class WrongDates : Throwable() {
 

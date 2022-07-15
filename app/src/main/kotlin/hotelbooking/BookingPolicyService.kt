@@ -1,5 +1,7 @@
 package hotelbooking
 
+import hotelbooking.model.EmployeeId
+
 class BookingPolicyService<CompanyId, RoomTypes, RoomType> {
     fun setCompanyPolicy(companyId: CompanyId, roomTypes: RoomTypes) {
         TODO()

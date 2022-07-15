@@ -1,5 +1,0 @@
-package hotelbooking
-
-class RoomType {
-
-}
