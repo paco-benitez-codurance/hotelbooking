@@ -1,5 +1,6 @@
 package hotelbooking
 
+import hotelbooking.errors.BookingNotAllowed
 import hotelbooking.errors.RoomTypeNotFound
 import hotelbooking.errors.WrongDates
 import hotelbooking.model.Booking
@@ -8,7 +9,11 @@ import hotelbooking.model.HotelId
 import hotelbooking.model.RoomType
 import java.time.LocalDate
 
-class BookingService(private val dateValidator: CheckDateValidator, private val hotelService: HotelService) {
+class BookingService(
+    private val dateValidator: CheckDateValidator,
+    private val hotelService: HotelService,
+    private val bookingPolicyService: BookingPolicyService
+) {
     fun book(
         employeeId: EmployeeId,
         hotelId: HotelId,
@@ -19,6 +24,9 @@ class BookingService(private val dateValidator: CheckDateValidator, private val 
 
         validateDates(checkIn, checkOut)
         validateHotelAndRoomType(hotelId, roomType)
+        if(!bookingPolicyService.isBookingAllowed(employeeId, roomType)) {
+            throw BookingNotAllowed()
+        }
 
         return Booking(employeeId, hotelId, roomType, checkIn, checkOut)
     }

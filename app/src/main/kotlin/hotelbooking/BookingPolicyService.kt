@@ -1,13 +1,15 @@
 package hotelbooking
 
+import hotelbooking.model.CompanyId
 import hotelbooking.model.EmployeeId
+import hotelbooking.model.RoomType
 
-class BookingPolicyService<CompanyId, RoomTypes, RoomType> {
-    fun setCompanyPolicy(companyId: CompanyId, roomTypes: RoomTypes) {
+class BookingPolicyService {
+    fun setCompanyPolicy(companyId: CompanyId, roomTypes: Collection<RoomType>) {
         TODO()
     }
 
-    fun setEmployeePolicy(employeeId: EmployeeId, roomTypes: RoomTypes) {
+    fun setEmployeePolicy(employeeId: EmployeeId, roomTypes: Collection<RoomType>) {
         TODO()
     }
 
