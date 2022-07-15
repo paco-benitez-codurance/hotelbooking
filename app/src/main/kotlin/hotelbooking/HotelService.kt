@@ -1,12 +1,20 @@
 package hotelbooking
 
+import hotelbooking.errors.HotelAlreadyExists
+import hotelbooking.errors.HotelNotFound
 import hotelbooking.model.Hotel
 import hotelbooking.model.HotelId
 import hotelbooking.model.RoomType
+import javax.annotation.Nonnull
 
 class HotelService {
+    private var hotelId: HotelId? = null
+
     fun addHotel(hotelId: HotelId, hotelName: String) {
-        TODO()
+        if(this.hotelId == hotelId) {
+            throw HotelAlreadyExists()
+        }
+        this.hotelId = hotelId
     }
 
     fun setRoom(hotelId: HotelId, number: Int, roomType: RoomType) {
@@ -14,6 +22,9 @@ class HotelService {
     }
 
     fun findHotelBy(hotelId: HotelId): Hotel {
-        TODO()
+        if(this.hotelId == hotelId) {
+            return Hotel(hotelId)
+        }
+        throw HotelNotFound()
     }
 }

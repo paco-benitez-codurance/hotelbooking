@@ -38,7 +38,7 @@ class BookingServiceTest {
     private val dateValidator = mockk<CheckDateValidator>()
     private val hotelService = mockk<HotelService>()
     private val bookingPolicyService = mockk<BookingPolicyService>()
-    private var bookingService = BookingService(dateValidator, hotelService, bookingPolicyService)
+    private lateinit var bookingService: BookingService
 
 
     @Before
