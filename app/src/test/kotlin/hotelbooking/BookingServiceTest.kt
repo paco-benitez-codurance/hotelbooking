@@ -3,6 +3,7 @@ package hotelbooking
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
+import org.junit.Before
 import java.time.LocalDate
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -19,21 +20,32 @@ import kotlin.test.assertFailsWith
 - [ ] Return booking confirmation to the employee or error otherwise (exceptions can also be used).
  */
 
+
 class BookingServiceTest {
     companion object {
         private val CHECKIN_DATE = LocalDate.of(2022, 1, 1)
         private val CHECKOUT_DATE = LocalDate.of(2022, 1, 5)
         private val EMPLOYEE_ID = EmployeeId()
-        private val HOTEL_ID = HotelId()
+        private val HOTEL_ID = HotelId("id1")
         private val ROOM_TYPE = RoomType()
+        private const val HOTEL_NAME = "A Hotel Name"
     }
 
     private val dateValidator = mockk<CheckDateValidator>()
-    private val bookingService = BookingService(dateValidator)
+    private val hotelService = mockk<HotelService>()
+    private var bookingService = BookingService(dateValidator, hotelService)
+
+
+    @Before
+    fun setUp() {
+        every { dateValidator.isValid(CHECKIN_DATE, CHECKOUT_DATE) }.returns(true)
+        every { hotelService.findHotelBy(HOTEL_ID) } returns Hotel()
+
+        bookingService = BookingService(dateValidator, hotelService)
+    }
 
     @Test
     fun should_returnBookingObject() {
-        every { dateValidator.isValid(CHECKIN_DATE, CHECKOUT_DATE) }.returns(true)
 
         val booking = bookingService.book(
             EMPLOYEE_ID, HOTEL_ID, ROOM_TYPE, CHECKIN_DATE, CHECKOUT_DATE
@@ -48,17 +60,49 @@ class BookingServiceTest {
 
     @Test
     fun exceptionShouldBeThrown_when_checkDateFails() {
-        every { dateValidator.isValid(CHECKIN_DATE, CHECKOUT_DATE) }.returns(false)
+
+        val wrongDate = mockk<LocalDate>()
+        every { dateValidator.isValid(CHECKIN_DATE, wrongDate) }.returns(false)
 
         assertFailsWith<WrongDates> {
             bookingService.book(
-                EMPLOYEE_ID, HOTEL_ID, ROOM_TYPE, CHECKIN_DATE, CHECKOUT_DATE
+                EMPLOYEE_ID, HOTEL_ID, ROOM_TYPE, CHECKIN_DATE, wrongDate
             )
         }
 
-        verify { dateValidator.isValid(CHECKIN_DATE, CHECKOUT_DATE) }
-
-
+        verify { dateValidator.isValid(CHECKIN_DATE, wrongDate) }
     }
+
+    @Test
+    fun validateIfHotelAndRoomTypeAreProvidedByTheHotel() {
+        val nonExistingHotelId = HotelId("nonExistingId")
+
+        every { hotelService.findHotelBy(nonExistingHotelId) } throws HotelNotFound()
+
+        assertFailsWith<HotelNotFound> {
+            bookingService.book(
+                EMPLOYEE_ID, nonExistingHotelId, ROOM_TYPE, CHECKIN_DATE, CHECKOUT_DATE
+            )
+        }
+    }
+
+    /*
+    @Test
+    fun validateIfHotelAndRoomTypeAreProvidedByTheHotel() {
+        val hotelService = HotelService<String>()
+
+        hotelService.addHotel(HOTEL_ID, HOTEL_NAME)
+        hotelService.setRoom(HOTEL_ID, 3, ROOM_TYPE)
+
+        val booking = bookingService.book(
+            EMPLOYEE_ID, HOTEL_ID, ROOM_TYPE, CHECKIN_DATE, CHECKOUT_DATE)
+
+        assertEquals(
+            booking, Booking(
+                EMPLOYEE_ID, HOTEL_ID, ROOM_TYPE, CHECKIN_DATE, CHECKOUT_DATE
+            )
+        )
+    }
+     */
 
 }

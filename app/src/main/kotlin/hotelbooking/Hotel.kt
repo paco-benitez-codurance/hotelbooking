@@ -1,0 +1,3 @@
+package hotelbooking
+
+class Hotel

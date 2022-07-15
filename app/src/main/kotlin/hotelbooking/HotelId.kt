@@ -1,5 +1,3 @@
 package hotelbooking
 
-class HotelId {
-
-}
+data class HotelId(val id: String)

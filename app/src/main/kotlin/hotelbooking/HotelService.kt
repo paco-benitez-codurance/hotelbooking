@@ -1,11 +1,11 @@
 package hotelbooking
 
-class HotelService<HotelId, HotelName, Hotel, Number, RoomType> {
-    fun addHotel(hotelId: HotelId, hotelName: HotelName) {
+class HotelService {
+    fun addHotel(hotelId: HotelId, hotelName: String) {
         TODO()
     }
 
-    fun setRoom(hotelId: HotelId, number: Number, roomType: RoomType) {
+    fun setRoom(hotelId: HotelId, number: Int, roomType: RoomType) {
         TODO()
     }
 
