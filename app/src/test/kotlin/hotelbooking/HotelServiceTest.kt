@@ -4,6 +4,7 @@ import hotelbooking.errors.HotelAlreadyExists
 import hotelbooking.errors.HotelNotFound
 import hotelbooking.model.Hotel
 import hotelbooking.model.HotelId
+import hotelbooking.model.RoomType
 import org.junit.Before
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -14,6 +15,7 @@ class HotelServiceTest {
     companion object {
         private val HOTEL_ID = HotelId("id1")
         private const val HOTEL_NAME = "Hotel Name"
+        private val ROOM_TYPE = RoomType()
     }
 
     private lateinit var hotelService: HotelService
@@ -46,5 +48,15 @@ class HotelServiceTest {
         val hotel = hotelService.findHotelBy(HOTEL_ID)
 
         assertEquals(expected, hotel)
+    }
+
+
+    @Test
+    fun hotelWithNoRooms_when_hotelFound() {
+        hotelService.addHotel(HOTEL_ID, HOTEL_NAME)
+
+        val hotel = hotelService.findHotelBy(HOTEL_ID)
+
+        assertEquals(0, hotel.rooms(ROOM_TYPE))
     }
 }
