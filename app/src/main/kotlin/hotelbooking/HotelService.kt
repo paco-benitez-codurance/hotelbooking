@@ -9,6 +9,7 @@ import javax.annotation.Nonnull
 
 class HotelService {
     private var hotelId: HotelId? = null
+    private var numberOfRoom: Int? = null
 
     fun addHotel(hotelId: HotelId, hotelName: String) {
         if(this.hotelId == hotelId) {
@@ -18,12 +19,15 @@ class HotelService {
     }
 
     fun setRoom(hotelId: HotelId, number: Int, roomType: RoomType) {
-        TODO()
+        if(this.hotelId != hotelId) {
+            throw HotelNotFound()
+        }
+        this.numberOfRoom = number
     }
 
     fun findHotelBy(hotelId: HotelId): Hotel {
         if(this.hotelId == hotelId) {
-            return Hotel(hotelId)
+            return Hotel(hotelId, numberOfRoom)
         }
         throw HotelNotFound()
     }

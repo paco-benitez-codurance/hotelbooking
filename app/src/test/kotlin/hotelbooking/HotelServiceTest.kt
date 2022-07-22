@@ -11,9 +11,10 @@ import org.junit.jupiter.api.assertThrows
 
 class HotelServiceTest : StringSpec({
 
-    val HOTEL_ID = HotelId("id1")
-    val HOTEL_NAME = "Hotel Name"
-    val ROOM_TYPE = RoomType()
+    val hotelId = HotelId("id1")
+    val nonExistingHotel = HotelId("nonExistingHotel")
+    val hotelName = "Hotel Name"
+    val roomType = RoomType()
 
     lateinit var hotelService: HotelService
 
@@ -23,33 +24,54 @@ class HotelServiceTest : StringSpec({
 
     "Exception should be raise when hotel already exists" {
 
-        hotelService.addHotel(HOTEL_ID, HOTEL_NAME)
+        hotelService.addHotel(hotelId, hotelName)
         assertThrows<HotelAlreadyExists> {
-            hotelService.addHotel(HOTEL_ID, HOTEL_NAME)
+            hotelService.addHotel(hotelId, hotelName)
         }
     }
 
     "Exception should be raise when hotel not found" {
         assertThrows<HotelNotFound> {
-            hotelService.findHotelBy(HOTEL_ID)
+            hotelService.findHotelBy(hotelId)
         }
     }
 
     "Return hotel info when found" {
-        hotelService.addHotel(HOTEL_ID, HOTEL_NAME)
+        hotelService.addHotel(hotelId, hotelName)
 
-        val expected = Hotel(HOTEL_ID)
-        val hotel = hotelService.findHotelBy(HOTEL_ID)
+        val expected = Hotel(hotelId)
+        val hotel = hotelService.findHotelBy(hotelId)
 
         hotel shouldBe expected
     }
 
 
     "Return hotel with no room when found" {
-        hotelService.addHotel(HOTEL_ID, HOTEL_NAME)
+        hotelService.addHotel(hotelId, hotelName)
 
-        val hotel = hotelService.findHotelBy(HOTEL_ID)
+        val hotel = hotelService.findHotelBy(hotelId)
 
-        hotel.rooms(ROOM_TYPE) shouldBe 0
+        hotel.rooms(roomType) shouldBe 0
+    }
+
+
+    "set room should fail when hotel not found" {
+        val numberOfRooms = 5
+
+        assertThrows<HotelNotFound> {
+            hotelService.setRoom(nonExistingHotel, numberOfRooms, roomType)
+        }
+    }
+
+
+    "hotel info should have the hotel room set" {
+        val numberOfRooms = 5
+
+        hotelService.addHotel(hotelId, hotelName)
+        hotelService.setRoom(hotelId, numberOfRooms, roomType)
+
+        val hotel = hotelService.findHotelBy(hotelId)
+
+        hotel.rooms(roomType) shouldBe numberOfRooms
     }
 })
