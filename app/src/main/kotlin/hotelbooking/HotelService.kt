@@ -7,29 +7,28 @@ import hotelbooking.model.HotelId
 import hotelbooking.model.RoomType
 
 class HotelService {
-    private var hotelId: HotelId? = null
-    private var numberOfRoom: Int? = null
-    private var roomType: RoomType? = null
+    private var hotel: Hotel? = null
 
     fun addHotel(hotelId: HotelId, hotelName: String) {
-        if(this.hotelId == hotelId) {
+        if(this.hotel?.hotelId == hotelId) {
             throw HotelAlreadyExists()
         }
-        this.hotelId = hotelId
+        this.hotel = Hotel(hotelId)
     }
 
     fun setRoom(hotelId: HotelId, number: Int, roomType: RoomType) {
-        if(this.hotelId != hotelId) {
-            throw HotelNotFound()
-        }
-        this.numberOfRoom = number
-        this.roomType = roomType
+        validateHotelExists(hotelId)
+        this.hotel = Hotel(hotelId, number, roomType)
     }
 
     fun findHotelBy(hotelId: HotelId): Hotel {
-        if(this.hotelId == hotelId) {
-            return Hotel(hotelId, numberOfRoom, roomType)
+        validateHotelExists(hotelId)
+        return hotel!!
+    }
+
+    private fun validateHotelExists(hotelId: HotelId) {
+        if (this.hotel?.hotelId != hotelId) {
+            throw HotelNotFound()
         }
-        throw HotelNotFound()
     }
 }
