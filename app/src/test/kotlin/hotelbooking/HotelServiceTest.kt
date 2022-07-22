@@ -14,7 +14,7 @@ class HotelServiceTest : StringSpec({
     val hotelId = HotelId("id1")
     val nonExistingHotel = HotelId("nonExistingHotel")
     val hotelName = "Hotel Name"
-    val roomType = RoomType()
+    val roomType = RoomType("room type")
 
     lateinit var hotelService: HotelService
 
@@ -63,6 +63,18 @@ class HotelServiceTest : StringSpec({
         }
     }
 
+    "number of room should be 0 when no type found" {
+        val numberOfRooms = 5
+
+        hotelService.addHotel(hotelId, hotelName)
+        hotelService.setRoom(hotelId, numberOfRooms, roomType)
+
+        val hotel = hotelService.findHotelBy(hotelId)
+
+        val otherRoomType = RoomType("out of service room type")
+        hotel.rooms(otherRoomType) shouldBe 0
+    }
+
 
     "hotel info should have the hotel room set" {
         val numberOfRooms = 5
@@ -73,5 +85,16 @@ class HotelServiceTest : StringSpec({
         val hotel = hotelService.findHotelBy(hotelId)
 
         hotel.rooms(roomType) shouldBe numberOfRooms
+    }
+
+    "hotel info should have room type" {
+        val numberOfRooms = 5
+
+        hotelService.addHotel(hotelId, hotelName)
+        hotelService.setRoom(hotelId, numberOfRooms, roomType)
+
+        val hotel = hotelService.findHotelBy(hotelId)
+
+        hotel.has(roomType) shouldBe true
     }
 })

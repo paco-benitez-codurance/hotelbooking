@@ -5,11 +5,11 @@ import hotelbooking.errors.HotelNotFound
 import hotelbooking.model.Hotel
 import hotelbooking.model.HotelId
 import hotelbooking.model.RoomType
-import javax.annotation.Nonnull
 
 class HotelService {
     private var hotelId: HotelId? = null
     private var numberOfRoom: Int? = null
+    private var roomType: RoomType? = null
 
     fun addHotel(hotelId: HotelId, hotelName: String) {
         if(this.hotelId == hotelId) {
@@ -23,11 +23,12 @@ class HotelService {
             throw HotelNotFound()
         }
         this.numberOfRoom = number
+        this.roomType = roomType
     }
 
     fun findHotelBy(hotelId: HotelId): Hotel {
         if(this.hotelId == hotelId) {
-            return Hotel(hotelId, numberOfRoom)
+            return Hotel(hotelId, numberOfRoom, roomType)
         }
         throw HotelNotFound()
     }

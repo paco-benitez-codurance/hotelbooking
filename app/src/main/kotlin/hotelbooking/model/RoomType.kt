@@ -1,5 +1,3 @@
 package hotelbooking.model
 
-class RoomType {
-
-}
+data class RoomType(val type: String)

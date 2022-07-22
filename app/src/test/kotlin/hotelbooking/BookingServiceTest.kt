@@ -31,7 +31,7 @@ class BookingServiceTest : StringSpec({
     val CHECKOUT_DATE = LocalDate.of(2022, 1, 5)
     val EMPLOYEE_ID = EmployeeId()
     val HOTEL_ID = HotelId("id1")
-    val ROOM_TYPE = RoomType()
+    val ROOM_TYPE = RoomType("Room Type")
 
     val dateValidator = mockk<CheckDateValidator>()
     val hotelService = mockk<HotelService>()
