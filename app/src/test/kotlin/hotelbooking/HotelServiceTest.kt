@@ -7,6 +7,7 @@ import hotelbooking.model.HotelId
 import hotelbooking.model.RoomType
 import io.kotest.core.spec.style.FreeSpec
 import io.kotest.core.spec.style.StringSpec
+import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import org.junit.jupiter.api.assertThrows
 
@@ -106,4 +107,20 @@ class HotelServiceTest : FreeSpec({
             hotel.has(roomType) shouldBe true
         }
     }
+
+    /*
+    "Multiple Hotel Management" - {
+        "Can add several hotels" {
+            hotelService.addHotel(hotelId, "One hotel Id")
+            val anotherHotelId = HotelId("another id")
+
+            hotelService.addHotel(anotherHotelId, "Another hotel id")
+
+            hotelService.findHotelBy(hotelId).shouldNotBeNull()
+            hotelService.findHotelBy(anotherHotelId).shouldNotBeNull()
+
+        }
+    }
+
+     */
 })

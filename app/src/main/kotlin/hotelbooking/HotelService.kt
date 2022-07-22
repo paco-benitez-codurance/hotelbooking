@@ -10,15 +10,16 @@ class HotelService {
     private var hotel: Hotel? = null
 
     fun addHotel(hotelId: HotelId, hotelName: String) {
-        if(this.hotel?.hotelId == hotelId) {
+        if (exists(hotelId)) {
             throw HotelAlreadyExists()
         }
-        this.hotel = Hotel(hotelId)
+        this.add(Hotel(hotelId))
     }
+
 
     fun setRoom(hotelId: HotelId, number: Int, roomType: RoomType) {
         validateHotelExists(hotelId)
-        this.hotel = Hotel(hotelId, number, roomType)
+        this.add(Hotel(hotelId, number, roomType))
     }
 
     fun findHotelBy(hotelId: HotelId): Hotel {
@@ -26,8 +27,14 @@ class HotelService {
         return hotel!!
     }
 
+    private fun add(hotel: Hotel) {
+        this.hotel = hotel
+    }
+
+    private fun exists(hotelId: HotelId) = this.hotel?.hotelId == hotelId
+
     private fun validateHotelExists(hotelId: HotelId) {
-        if (this.hotel?.hotelId != hotelId) {
+        if (!exists(hotelId)) {
             throw HotelNotFound()
         }
     }
