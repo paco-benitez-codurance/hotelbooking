@@ -1,43 +1,34 @@
 package hotelbooking
 
+import io.kotest.core.spec.style.StringSpec
+import io.kotest.matchers.shouldBe
 import java.time.LocalDate
-import kotlin.test.*
 
 
-class CheckDateValidatorTest {
-    companion object {
-        private val ONE_DATE = LocalDate.of(2022, 1, 1)
+
+class CheckDateValidatorTest : StringSpec({
+
+    val ONE_DATE = LocalDate.of(2022, 1, 1)
+    val dateValidator = CheckDateValidator()
+
+    "Should fail when checkoutDate and checkin are the same" {
+        dateValidator.isValid(
+            ONE_DATE,
+            ONE_DATE
+        ) shouldBe false
     }
 
-    private val dateValidator = CheckDateValidator()
-
-    @Test
-    fun checkoutDate_shouldFail_withSameCheckinCheckoutDate() {
-        assertFalse {
-            dateValidator.isValid(
-                ONE_DATE,
-                ONE_DATE
-            )
-        }
+    "Should fail when checkout date is in the past of checkin" {
+        dateValidator.isValid(
+            ONE_DATE,
+            ONE_DATE.minusDays(1)
+        ) shouldBe false
     }
 
-    @Test
-    fun checkoutDate_shouldFail_withCheckoutInThePastOfCheckin() {
-        assertFalse {
-            dateValidator.isValid(
-                ONE_DATE,
-                ONE_DATE.minusDays(1)
-            )
-        }
+    "Checkout should be at least one day after check in" {
+        dateValidator.isValid(
+            ONE_DATE,
+            ONE_DATE.plusDays(1)
+        ) shouldBe true
     }
-
-    @Test
-    fun checkoutDate_shouldBe_atLeastOneDayAfterCheckin() {
-        assertTrue {
-            dateValidator.isValid(
-                ONE_DATE,
-                ONE_DATE.plusDays(1)
-            )
-        }
-    }
-}
+})

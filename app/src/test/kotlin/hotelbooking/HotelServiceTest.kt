@@ -5,58 +5,51 @@ import hotelbooking.errors.HotelNotFound
 import hotelbooking.model.Hotel
 import hotelbooking.model.HotelId
 import hotelbooking.model.RoomType
-import org.junit.Before
-import kotlin.test.Test
-import kotlin.test.assertEquals
-import kotlin.test.assertFailsWith
+import io.kotest.core.spec.style.StringSpec
+import io.kotest.matchers.shouldBe
+import org.junit.jupiter.api.assertThrows
 
+class HotelServiceTest : StringSpec({
 
-class HotelServiceTest {
-    companion object {
-        private val HOTEL_ID = HotelId("id1")
-        private const val HOTEL_NAME = "Hotel Name"
-        private val ROOM_TYPE = RoomType()
-    }
+    val HOTEL_ID = HotelId("id1")
+    val HOTEL_NAME = "Hotel Name"
+    val ROOM_TYPE = RoomType()
 
-    private lateinit var hotelService: HotelService
+    lateinit var hotelService: HotelService
 
-    @Before
-    fun setUp() {
+    beforeEach {
         hotelService = HotelService()
     }
 
-    @Test
-    fun exception_when_hotelAlreadyExists() {
+    "Exception should be raise when hotel already exists" {
+
         hotelService.addHotel(HOTEL_ID, HOTEL_NAME)
-        assertFailsWith<HotelAlreadyExists> {
+        assertThrows<HotelAlreadyExists> {
             hotelService.addHotel(HOTEL_ID, HOTEL_NAME)
         }
     }
 
-    @Test
-    fun exception_when_hotelNotFound() {
-        assertFailsWith<HotelNotFound> {
+    "Exception should be raise when hotel not found" {
+        assertThrows<HotelNotFound> {
             hotelService.findHotelBy(HOTEL_ID)
         }
     }
 
-    @Test
-    fun hotelInfo_when_hotelFound() {
+    "Return hotel info when found" {
         hotelService.addHotel(HOTEL_ID, HOTEL_NAME)
 
         val expected = Hotel(HOTEL_ID)
         val hotel = hotelService.findHotelBy(HOTEL_ID)
 
-        assertEquals(expected, hotel)
+        hotel shouldBe expected
     }
 
 
-    @Test
-    fun hotelWithNoRooms_when_hotelFound() {
+    "Return hotel with no room when found" {
         hotelService.addHotel(HOTEL_ID, HOTEL_NAME)
 
         val hotel = hotelService.findHotelBy(HOTEL_ID)
 
-        assertEquals(0, hotel.rooms(ROOM_TYPE))
+        hotel.rooms(ROOM_TYPE) shouldBe 0
     }
-}
+})

@@ -5,14 +5,13 @@ import hotelbooking.errors.HotelNotFound
 import hotelbooking.errors.RoomTypeNotFound
 import hotelbooking.errors.WrongDates
 import hotelbooking.model.*
+import io.kotest.assertions.throwables.shouldThrow
+import io.kotest.core.spec.style.StringSpec
+import io.kotest.matchers.shouldBe
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
-import org.junit.Before
 import java.time.LocalDate
-import kotlin.test.Test
-import kotlin.test.assertEquals
-import kotlin.test.assertFailsWith
 
 /*
 - [X] Booking should contain a unique ID, employeeId, hotelId, roomType, checkIn and checkOut.
@@ -26,23 +25,34 @@ import kotlin.test.assertFailsWith
  */
 
 
-class BookingServiceTest {
-    companion object {
-        private val CHECKIN_DATE = LocalDate.of(2022, 1, 1)
-        private val CHECKOUT_DATE = LocalDate.of(2022, 1, 5)
-        private val EMPLOYEE_ID = EmployeeId()
-        private val HOTEL_ID = HotelId("id1")
-        private val ROOM_TYPE = RoomType()
+class BookingServiceTest : StringSpec({
+
+    val CHECKIN_DATE = LocalDate.of(2022, 1, 1)
+    val CHECKOUT_DATE = LocalDate.of(2022, 1, 5)
+    val EMPLOYEE_ID = EmployeeId()
+    val HOTEL_ID = HotelId("id1")
+    val ROOM_TYPE = RoomType()
+
+    val dateValidator = mockk<CheckDateValidator>()
+    val hotelService = mockk<HotelService>()
+    val bookingPolicyService = mockk<BookingPolicyService>()
+    lateinit var bookingService: BookingService
+
+    fun setupBookingPolicyService() {
+        every { bookingPolicyService.isBookingAllowed(EMPLOYEE_ID, ROOM_TYPE) } returns true
     }
 
-    private val dateValidator = mockk<CheckDateValidator>()
-    private val hotelService = mockk<HotelService>()
-    private val bookingPolicyService = mockk<BookingPolicyService>()
-    private lateinit var bookingService: BookingService
+    fun setupHotelService() {
+        val hotel = mockk<Hotel>()
+        every { hotel.has(ROOM_TYPE) } returns true
+        every { hotelService.findHotelBy(HOTEL_ID) } returns hotel
+    }
 
+    fun setupDateValidator() {
+        every { dateValidator.isValid(CHECKIN_DATE, CHECKOUT_DATE) }.returns(true)
+    }
 
-    @Before
-    fun setUp() {
+    beforeTest {
         setupDateValidator()
         setupHotelService()
         setupBookingPolicyService()
@@ -50,27 +60,23 @@ class BookingServiceTest {
         bookingService = BookingService(dateValidator, hotelService, bookingPolicyService)
     }
 
-    @Test
-    fun should_returnBookingObject() {
+    "Booking should contain a unique ID, employeeId, hotelId, roomType, checkIn and checkOut" {
 
         val booking = bookingService.book(
             EMPLOYEE_ID, HOTEL_ID, ROOM_TYPE, CHECKIN_DATE, CHECKOUT_DATE
         )
 
-        assertEquals(
-            booking, Booking(
-                EMPLOYEE_ID, HOTEL_ID, ROOM_TYPE, CHECKIN_DATE, CHECKOUT_DATE
-            )
+        booking shouldBe Booking(
+            EMPLOYEE_ID, HOTEL_ID, ROOM_TYPE, CHECKIN_DATE, CHECKOUT_DATE
         )
     }
 
-    @Test
-    fun exceptionShouldBeThrown_when_checkDateFails() {
+    "Exception should be raise when check date fails" {
 
         val wrongDate = mockk<LocalDate>()
         every { dateValidator.isValid(CHECKIN_DATE, wrongDate) }.returns(false)
 
-        assertFailsWith<WrongDates> {
+        shouldThrow<WrongDates> {
             bookingService.book(
                 EMPLOYEE_ID, HOTEL_ID, ROOM_TYPE, CHECKIN_DATE, wrongDate
             )
@@ -79,34 +85,31 @@ class BookingServiceTest {
         verify { dateValidator.isValid(CHECKIN_DATE, wrongDate) }
     }
 
-    @Test
-    fun exception_when_hotelIsNotFound() {
+    "Exception should be raise when hotel is not found" {
         val nonExistingHotelId = HotelId("nonExistingId")
 
         every { hotelService.findHotelBy(nonExistingHotelId) } throws HotelNotFound()
 
-        assertFailsWith<HotelNotFound> {
+        shouldThrow<HotelNotFound> {
             bookingService.book(
                 EMPLOYEE_ID, nonExistingHotelId, ROOM_TYPE, CHECKIN_DATE, CHECKOUT_DATE
             )
         }
     }
 
-    @Test
-    fun exception_when_roomTypeIsNotFound() {
+    "Exception should be raise when room type is not found" {
         val hotel = mockk<Hotel>()
         every { hotel.has(ROOM_TYPE) } returns false
         every { hotelService.findHotelBy(HOTEL_ID) } returns hotel
 
-        assertFailsWith<RoomTypeNotFound> {
+        shouldThrow<RoomTypeNotFound> {
             bookingService.book(
                 EMPLOYEE_ID, HOTEL_ID, ROOM_TYPE, CHECKIN_DATE, CHECKOUT_DATE
             )
         }
     }
 
-    @Test
-    fun exception_when_bookingPolicyDeny() {
+    "Exception should be raise when policy denied the room" {
 
         val notAllowedType = mockk<RoomType>()
 
@@ -116,25 +119,12 @@ class BookingServiceTest {
 
         every { bookingPolicyService.isBookingAllowed(EMPLOYEE_ID, notAllowedType) } returns false
 
-        assertFailsWith<BookingNotAllowed> {
+        shouldThrow<BookingNotAllowed> {
             bookingService.book(
                 EMPLOYEE_ID, HOTEL_ID, notAllowedType, CHECKIN_DATE, CHECKOUT_DATE
             )
         }
     }
 
-    private fun setupBookingPolicyService() {
-        every { bookingPolicyService.isBookingAllowed(EMPLOYEE_ID, ROOM_TYPE) } returns true
-    }
 
-    private fun setupHotelService() {
-        val hotel = mockk<Hotel>()
-        every { hotel.has(ROOM_TYPE) } returns true
-        every { hotelService.findHotelBy(HOTEL_ID) } returns hotel
-    }
-
-    private fun setupDateValidator() {
-        every { dateValidator.isValid(CHECKIN_DATE, CHECKOUT_DATE) }.returns(true)
-    }
-
-}
+})
