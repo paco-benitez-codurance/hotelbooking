@@ -1,7 +1,3 @@
-
-# Created by https://www.toptal.com/developers/gitignore/api/kotlin,intellij+all,gradle
-# Edit at https://www.toptal.com/developers/gitignore?templates=kotlin,intellij+all,gradle
-
 .idea
 
 # Gradle and Maven with auto-import
