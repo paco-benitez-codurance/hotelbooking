@@ -52,6 +52,11 @@ class HotelServiceTest : FreeSpec({
 
     "Room Management" - {
 
+        fun setupHotelAndRoom(numberOfRooms: Int) {
+            hotelService.addHotel(hotelId, hotelName)
+            hotelService.setRoom(hotelId, numberOfRooms, roomType)
+        }
+
         "Return hotel with no room when found" {
             hotelService.addHotel(hotelId, hotelName)
 
@@ -72,8 +77,7 @@ class HotelServiceTest : FreeSpec({
         "number of room should be 0 when no type found" {
             val numberOfRooms = 5
 
-            hotelService.addHotel(hotelId, hotelName)
-            hotelService.setRoom(hotelId, numberOfRooms, roomType)
+            setupHotelAndRoom(numberOfRooms)
 
             val hotel = hotelService.findHotelBy(hotelId)
 
@@ -85,8 +89,7 @@ class HotelServiceTest : FreeSpec({
         "hotel info should return the number of room by room type" {
             val numberOfRooms = 5
 
-            hotelService.addHotel(hotelId, hotelName)
-            hotelService.setRoom(hotelId, numberOfRooms, roomType)
+            setupHotelAndRoom(numberOfRooms)
 
             val hotel = hotelService.findHotelBy(hotelId)
 
@@ -96,8 +99,7 @@ class HotelServiceTest : FreeSpec({
         "hotel info should has room type" {
             val numberOfRooms = 5
 
-            hotelService.addHotel(hotelId, hotelName)
-            hotelService.setRoom(hotelId, numberOfRooms, roomType)
+            setupHotelAndRoom(numberOfRooms)
 
             val hotel = hotelService.findHotelBy(hotelId)
 
