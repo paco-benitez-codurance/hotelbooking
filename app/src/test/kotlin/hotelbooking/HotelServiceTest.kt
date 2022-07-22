@@ -5,11 +5,12 @@ import hotelbooking.errors.HotelNotFound
 import hotelbooking.model.Hotel
 import hotelbooking.model.HotelId
 import hotelbooking.model.RoomType
+import io.kotest.core.spec.style.FreeSpec
 import io.kotest.core.spec.style.StringSpec
 import io.kotest.matchers.shouldBe
 import org.junit.jupiter.api.assertThrows
 
-class HotelServiceTest : StringSpec({
+class HotelServiceTest : FreeSpec({
 
     val hotelId = HotelId("id1")
     val nonExistingHotel = HotelId("nonExistingHotel")
@@ -22,79 +23,85 @@ class HotelServiceTest : StringSpec({
         hotelService = HotelService()
     }
 
-    "Exception should be raise when hotel already exists" {
+    "Hotel Management" - {
 
-        hotelService.addHotel(hotelId, hotelName)
-        assertThrows<HotelAlreadyExists> {
+        "Exception should be raise when hotel already exists" {
+
             hotelService.addHotel(hotelId, hotelName)
+            assertThrows<HotelAlreadyExists> {
+                hotelService.addHotel(hotelId, hotelName)
+            }
+        }
+
+        "Exception should be raise when hotel not found" {
+            assertThrows<HotelNotFound> {
+                hotelService.findHotelBy(hotelId)
+            }
+        }
+
+        "Return hotel info when found" {
+            hotelService.addHotel(hotelId, hotelName)
+
+            val expected = Hotel(hotelId)
+            val hotel = hotelService.findHotelBy(hotelId)
+
+            hotel shouldBe expected
         }
     }
 
-    "Exception should be raise when hotel not found" {
-        assertThrows<HotelNotFound> {
-            hotelService.findHotelBy(hotelId)
+
+    "Room Management" - {
+
+        "Return hotel with no room when found" {
+            hotelService.addHotel(hotelId, hotelName)
+
+            val hotel = hotelService.findHotelBy(hotelId)
+
+            hotel.rooms(roomType) shouldBe 0
         }
-    }
-
-    "Return hotel info when found" {
-        hotelService.addHotel(hotelId, hotelName)
-
-        val expected = Hotel(hotelId)
-        val hotel = hotelService.findHotelBy(hotelId)
-
-        hotel shouldBe expected
-    }
 
 
-    "Return hotel with no room when found" {
-        hotelService.addHotel(hotelId, hotelName)
+        "set room should fail when hotel not found" {
+            val numberOfRooms = 5
 
-        val hotel = hotelService.findHotelBy(hotelId)
-
-        hotel.rooms(roomType) shouldBe 0
-    }
-
-
-    "set room should fail when hotel not found" {
-        val numberOfRooms = 5
-
-        assertThrows<HotelNotFound> {
-            hotelService.setRoom(nonExistingHotel, numberOfRooms, roomType)
+            assertThrows<HotelNotFound> {
+                hotelService.setRoom(nonExistingHotel, numberOfRooms, roomType)
+            }
         }
-    }
 
-    "number of room should be 0 when no type found" {
-        val numberOfRooms = 5
+        "number of room should be 0 when no type found" {
+            val numberOfRooms = 5
 
-        hotelService.addHotel(hotelId, hotelName)
-        hotelService.setRoom(hotelId, numberOfRooms, roomType)
+            hotelService.addHotel(hotelId, hotelName)
+            hotelService.setRoom(hotelId, numberOfRooms, roomType)
 
-        val hotel = hotelService.findHotelBy(hotelId)
+            val hotel = hotelService.findHotelBy(hotelId)
 
-        val otherRoomType = RoomType("out of service room type")
-        hotel.rooms(otherRoomType) shouldBe 0
-    }
+            val otherRoomType = RoomType("out of service room type")
+            hotel.rooms(otherRoomType) shouldBe 0
+        }
 
 
-    "hotel info should have the hotel room set" {
-        val numberOfRooms = 5
+        "hotel info should return the number of room by room type" {
+            val numberOfRooms = 5
 
-        hotelService.addHotel(hotelId, hotelName)
-        hotelService.setRoom(hotelId, numberOfRooms, roomType)
+            hotelService.addHotel(hotelId, hotelName)
+            hotelService.setRoom(hotelId, numberOfRooms, roomType)
 
-        val hotel = hotelService.findHotelBy(hotelId)
+            val hotel = hotelService.findHotelBy(hotelId)
 
-        hotel.rooms(roomType) shouldBe numberOfRooms
-    }
+            hotel.rooms(roomType) shouldBe numberOfRooms
+        }
 
-    "hotel info should have room type" {
-        val numberOfRooms = 5
+        "hotel info should has room type" {
+            val numberOfRooms = 5
 
-        hotelService.addHotel(hotelId, hotelName)
-        hotelService.setRoom(hotelId, numberOfRooms, roomType)
+            hotelService.addHotel(hotelId, hotelName)
+            hotelService.setRoom(hotelId, numberOfRooms, roomType)
 
-        val hotel = hotelService.findHotelBy(hotelId)
+            val hotel = hotelService.findHotelBy(hotelId)
 
-        hotel.has(roomType) shouldBe true
+            hotel.has(roomType) shouldBe true
+        }
     }
 })
