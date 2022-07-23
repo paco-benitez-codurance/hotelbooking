@@ -36,4 +36,5 @@ class HotelService {
     }
 
     private fun exists(hotelId: HotelId) = this.hotels.count{ it.hotelId == hotelId } > 0
+
 }
