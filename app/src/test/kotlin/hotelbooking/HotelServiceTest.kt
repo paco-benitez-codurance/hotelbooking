@@ -108,7 +108,6 @@ class HotelServiceTest : FreeSpec({
         }
     }
 
-    /*
     "Multiple Hotel Management" - {
         "Can add several hotels" {
             hotelService.addHotel(hotelId, "One hotel Id")
@@ -121,6 +120,4 @@ class HotelServiceTest : FreeSpec({
 
         }
     }
-
-     */
 })
