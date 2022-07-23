@@ -29,7 +29,7 @@ class BookingServiceTest : StringSpec({
 
     val CHECKIN_DATE = LocalDate.of(2022, 1, 1)
     val CHECKOUT_DATE = LocalDate.of(2022, 1, 5)
-    val EMPLOYEE_ID = EmployeeId()
+    val EMPLOYEE_ID = EmployeeId("employee id")
     val HOTEL_ID = HotelId("id1")
     val ROOM_TYPE = RoomType("Room Type")
 

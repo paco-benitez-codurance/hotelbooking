@@ -1,5 +1,3 @@
 package hotelbooking.model
 
-class CompanyId {
-
-}
+data class CompanyId(val id: String)
