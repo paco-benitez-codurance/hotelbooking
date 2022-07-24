@@ -9,19 +9,32 @@ import hotelbooking.model.RoomType
 
 class BookingPolicyService {
 
-    var companyPolicyAdded = false
-    var employeePolicyAdded: Array<EmployeeId> = emptyArray()
+    private var companyPolicyAdded = false
+    private var employeePolicies: Array<EmployeePolicy> = emptyArray()
+
+    data class EmployeePolicy(val employeeId: EmployeeId, val roomTypes: Collection<RoomType>) {
+        fun containsRoomType(roomType: RoomType): Boolean = roomTypes.contains(roomType)
+
+    }
+
     fun setCompanyPolicy(companyId: CompanyId, roomTypes: Collection<RoomType>) {
-        if(companyPolicyAdded) throw CompanyPolicyDuplicated()
+        if (companyPolicyAdded) throw CompanyPolicyDuplicated()
         companyPolicyAdded = true
     }
 
     fun setEmployeePolicy(employeeId: EmployeeId, roomTypes: Collection<RoomType>) {
-        if(employeePolicyAdded.contains(employeeId)) throw EmployeePolicyDuplicated()
-        employeePolicyAdded = employeePolicyAdded + employeeId
+        checkNoPolicyDuplicated(employeeId)
+        employeePolicies += EmployeePolicy(employeeId, roomTypes)
     }
 
     fun isBookingAllowed(employeeId: EmployeeId, roomType: RoomType): Boolean {
-        return employeePolicyAdded.contains(employeeId)
+        return employeePolicies
+            .any { it.employeeId == employeeId && it.containsRoomType(roomType) }
     }
+
+    private fun checkNoPolicyDuplicated(employeeId: EmployeeId) {
+        if (isPolicyDuplicated(employeeId)) throw EmployeePolicyDuplicated()
+    }
+
+    private fun isPolicyDuplicated(employeeId: EmployeeId) = employeePolicies.map { it.employeeId }.contains(employeeId)
 }

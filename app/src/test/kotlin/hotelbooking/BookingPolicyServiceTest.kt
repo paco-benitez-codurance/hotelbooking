@@ -74,6 +74,12 @@ class BookingPolicyServiceTest : FreeSpec({
             bookingPolicyService.isBookingAllowed(employeeId, roomType) shouldBe true
             bookingPolicyService.isBookingAllowed(otherEmployeeId, roomType) shouldBe true
         }
+
+        "only is booking allowed if is same room type" {
+            bookingPolicyService.setEmployeePolicy(employeeId, roomTypes)
+            val otherRoomType = RoomType("other room type")
+            bookingPolicyService.isBookingAllowed(employeeId, otherRoomType) shouldBe false
+        }
     }
 
 })
