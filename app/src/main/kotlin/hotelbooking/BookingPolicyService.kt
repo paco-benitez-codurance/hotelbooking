@@ -10,18 +10,18 @@ import hotelbooking.model.RoomType
 class BookingPolicyService {
 
     var companyPolicyAdded = false
-    var employeePolicyAdded = false
+    var employeePolicyAdded: Array<EmployeeId> = emptyArray()
     fun setCompanyPolicy(companyId: CompanyId, roomTypes: Collection<RoomType>) {
         if(companyPolicyAdded) throw CompanyPolicyDuplicated()
         companyPolicyAdded = true
     }
 
     fun setEmployeePolicy(employeeId: EmployeeId, roomTypes: Collection<RoomType>) {
-        if(employeePolicyAdded) throw EmployeePolicyDuplicated()
-        employeePolicyAdded = true
+        if(employeePolicyAdded.contains(employeeId)) throw EmployeePolicyDuplicated()
+        employeePolicyAdded = employeePolicyAdded + employeeId
     }
 
     fun isBookingAllowed(employeeId: EmployeeId, roomType: RoomType): Boolean {
-        TODO()
+        return employeePolicyAdded.contains(employeeId)
     }
 }
