@@ -9,6 +9,8 @@ import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.core.spec.style.FreeSpec
 
 import io.kotest.matchers.shouldBe
+import io.mockk.every
+import io.mockk.mockk
 
 
 class BookingPolicyServiceTest : FreeSpec({
@@ -19,9 +21,12 @@ class BookingPolicyServiceTest : FreeSpec({
     val employeeId = EmployeeId("employee id")
 
     lateinit var bookingPolicyService: BookingPolicyService
+    lateinit var belongable: Belongable
 
     beforeEach {
-        bookingPolicyService = BookingPolicyService()
+        belongable = mockk()
+        every { belongable.company(any()) } returns null
+        bookingPolicyService = BookingPolicyService(belongable)
     }
 
 
@@ -48,11 +53,11 @@ class BookingPolicyServiceTest : FreeSpec({
         }
     }
 
-    "isBookingAllowed" - {
+    "if no policy is added should return false" {
+        bookingPolicyService.isBookingAllowed(employeeId, roomType) shouldBe false
+    }
 
-        "if no policy is added should return false" {
-            bookingPolicyService.isBookingAllowed(employeeId, roomType) shouldBe false
-        }
+    "isBookingAllowed with employee policy" - {
 
         "if employee policy is added should return true" {
             bookingPolicyService.setEmployeePolicy(employeeId, roomTypes)
@@ -82,4 +87,16 @@ class BookingPolicyServiceTest : FreeSpec({
         }
     }
 
+    "isBookingAllowed with company policy" - {
+        "if company policy is added should return false for an employee that does not belong to the company" {
+            bookingPolicyService.setCompanyPolicy(companyId, roomTypes)
+            bookingPolicyService.isBookingAllowed(employeeId, roomType) shouldBe false
+        }
+
+        "if company policy is added should return true for an employee that belongs to the company" {
+            bookingPolicyService.setCompanyPolicy(companyId, roomTypes)
+            every { belongable.company(employeeId) } returns companyId
+            bookingPolicyService.isBookingAllowed(employeeId, roomType) shouldBe true
+        }
+    }
 })
