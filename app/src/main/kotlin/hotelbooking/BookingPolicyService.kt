@@ -7,55 +7,72 @@ import hotelbooking.model.EmployeeId
 import hotelbooking.model.RoomType
 
 
-class BookingPolicyService(val belongable: Belongable) {
+class BookingPolicyService(private val belongable: Belongable) {
 
-    private var companyPolicies: Array<CompanyPolicy> = emptyArray()
-    private var employeePolicies: Array<EmployeePolicy> = emptyArray()
-
-    data class EmployeePolicy(val employeeId: EmployeeId, val roomTypes: Collection<RoomType>) {
-        fun containsRoomType(roomType: RoomType): Boolean = roomTypes.contains(roomType)
-    }
-
-    data class CompanyPolicy(val companyId: CompanyId, val roomTypes: Collection<RoomType>) {
-        fun containsRoomType(roomType: RoomType): Boolean = roomTypes.contains(roomType)
-    }
+    private var companyPolicy: RoomTypePolicy<CompanyId> = RoomTypePolicy.empty()
+    private var employeePolicy: RoomTypePolicy<EmployeeId> = RoomTypePolicy.empty()
 
 
     fun setCompanyPolicy(companyId: CompanyId, roomTypes: Collection<RoomType>) {
-        checkNoPolicyDuplicated(companyId)
-        companyPolicies += CompanyPolicy(companyId, roomTypes)
+        if (!companyPolicy.addPolicy(companyId, roomTypes)) throw CompanyPolicyDuplicated()
     }
 
     fun setEmployeePolicy(employeeId: EmployeeId, roomTypes: Collection<RoomType>) {
-        checkNoPolicyDuplicated(employeeId)
-        employeePolicies += EmployeePolicy(employeeId, roomTypes)
+        if (!employeePolicy.addPolicy(employeeId, roomTypes)) throw EmployeePolicyDuplicated()
     }
 
     fun isBookingAllowed(employeeId: EmployeeId, roomType: RoomType): Boolean {
-        return isEmployeeBookingAllowed(employeeId, roomType)  || isCompanyBookingAllowed(employeeId, roomType)
+        return isEmployeeBookingAllowed(employeeId, roomType) || isCompanyBookingAllowed(employeeId, roomType)
     }
 
-    private fun isCompanyBookingAllowed(employeeId: EmployeeId, roomType: RoomType): Boolean {
-        val companyId = belongable.company(employeeId)
-        return companyPolicies
-            .any { it.companyId == companyId && it.containsRoomType(roomType) }
+    private fun isCompanyBookingAllowed(
+        employeeId: EmployeeId,
+        roomType: RoomType
+    ): Boolean {
+        val companyId = belongable.company(employeeId) ?: return false
+        return companyPolicy.isBookingAllowed(companyId, roomType)
     }
 
     private fun isEmployeeBookingAllowed(
         employeeId: EmployeeId,
         roomType: RoomType
     ): Boolean {
-        return employeePolicies
-            .any { it.employeeId == employeeId && it.containsRoomType(roomType) }
+        return employeePolicy.isBookingAllowed(employeeId, roomType)
     }
 
-    private fun checkNoPolicyDuplicated(employeeId: EmployeeId) {
-        if (isPolicyDuplicated(employeeId)) throw EmployeePolicyDuplicated()
-    }
-    private fun isPolicyDuplicated(employeeId: EmployeeId) = employeePolicies.map { it.employeeId }.contains(employeeId)
+    internal class RoomTypePolicy<ItemId> {
 
-    private fun checkNoPolicyDuplicated(companyId: CompanyId) {
-        if (isPolicyDuplicated(companyId)) throw CompanyPolicyDuplicated()
+        private var policies: Array<RoomTypePolicyItem<ItemId>> = emptyArray()
+
+        companion object {
+            fun <ItemId> empty() = RoomTypePolicy<ItemId>()
+        }
+
+        fun addPolicy(itemId: ItemId, roomTypes: Collection<RoomType>): Boolean {
+            if (isPolicyDuplicated(itemId)) return false
+            policies += RoomTypePolicyItem(itemId, roomTypes)
+            return true
+
+        }
+
+        private fun isPolicyDuplicated(itemId: ItemId) = policies.map { it.item }.contains(itemId)
+
+        fun isBookingAllowed(
+            itemId: ItemId,
+            roomType: RoomType
+        ): Boolean {
+            return policies
+                .any { it.item == itemId && it.containsRoomType(roomType) }
+        }
+
+        private data class RoomTypePolicyItem<ItemId>(
+            val item: ItemId,
+            val roomTypes: Collection<RoomType>
+        ) {
+            fun containsRoomType(roomType: RoomType): Boolean = roomTypes.contains(roomType)
+        }
+
     }
-    private fun isPolicyDuplicated(companyId: CompanyId) = companyPolicies.map { it.companyId }.contains(companyId)
+
+
 }

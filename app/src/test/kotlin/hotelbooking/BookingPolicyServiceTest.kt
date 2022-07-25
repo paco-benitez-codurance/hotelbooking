@@ -98,5 +98,12 @@ class BookingPolicyServiceTest : FreeSpec({
             every { belongable.company(employeeId) } returns companyId
             bookingPolicyService.isBookingAllowed(employeeId, roomType) shouldBe true
         }
+
+        "if company policy is added should return false for an employee that does not belong to the company" {
+            bookingPolicyService.setCompanyPolicy(companyId, roomTypes)
+            val anotherCompanyId = CompanyId("Another company id")
+            every { belongable.company(employeeId) } returns anotherCompanyId
+            bookingPolicyService.isBookingAllowed(employeeId, roomType) shouldBe false
+        }
     }
 })
