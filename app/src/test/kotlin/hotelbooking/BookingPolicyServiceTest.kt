@@ -119,5 +119,9 @@ class BookingPolicyServiceTest : FreeSpec({
 
             bookingPolicyService.isBookingAllowed(employeeId, roomTypeForCompany) shouldBe false
         }
+
+        "If no rules should be allowed to check any room type" {
+            bookingPolicyService.isBookingAllowed(employeeId, roomType) shouldBe true
+        }
     }
 })

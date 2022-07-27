@@ -25,15 +25,11 @@ class BookingPolicyService(private val belongable: Belongable) {
         if (employeePolicy.hasRuleFor(employeeId)) {
             return employeePolicy.isBookingAllowed(employeeId, roomType)
         }
-        return isCompanyBookingAllowed(employeeId, roomType)
-    }
-
-    private fun isCompanyBookingAllowed(
-        employeeId: EmployeeId,
-        roomType: RoomType
-    ): Boolean {
-        val companyId = belongable.company(employeeId) ?: return false
-        return companyPolicy.isBookingAllowed(companyId, roomType)
+        val companyId = belongable.company(employeeId)
+        if (companyId != null && companyPolicy.hasRuleFor(companyId)) {
+            return companyPolicy.isBookingAllowed(companyId, roomType)
+        }
+        return true
     }
 
 
