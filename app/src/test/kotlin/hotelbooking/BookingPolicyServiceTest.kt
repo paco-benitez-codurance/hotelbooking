@@ -106,4 +106,18 @@ class BookingPolicyServiceTest : FreeSpec({
             bookingPolicyService.isBookingAllowed(employeeId, roomType) shouldBe false
         }
     }
+    "isBookingAllowed employee and booking policies" - {
+        "Employee policy should take preference" {
+            val roomTypeForCompany = RoomType("forCompany")
+            val roomTypesForCompany = arrayListOf(roomTypeForCompany)
+            val roomTypesForEmployees = arrayListOf(RoomType("forEmployee"))
+
+            bookingPolicyService.setCompanyPolicy(companyId, roomTypesForCompany)
+            bookingPolicyService.setEmployeePolicy(employeeId, roomTypesForEmployees)
+
+            every { belongable.company(employeeId) } returns companyId
+
+            bookingPolicyService.isBookingAllowed(employeeId, roomTypeForCompany) shouldBe false
+        }
+    }
 })

@@ -22,7 +22,10 @@ class BookingPolicyService(private val belongable: Belongable) {
     }
 
     fun isBookingAllowed(employeeId: EmployeeId, roomType: RoomType): Boolean {
-        return isEmployeeBookingAllowed(employeeId, roomType) || isCompanyBookingAllowed(employeeId, roomType)
+        if (employeePolicy.hasRuleFor(employeeId)) {
+            return employeePolicy.isBookingAllowed(employeeId, roomType)
+        }
+        return isCompanyBookingAllowed(employeeId, roomType)
     }
 
     private fun isCompanyBookingAllowed(
@@ -33,12 +36,6 @@ class BookingPolicyService(private val belongable: Belongable) {
         return companyPolicy.isBookingAllowed(companyId, roomType)
     }
 
-    private fun isEmployeeBookingAllowed(
-        employeeId: EmployeeId,
-        roomType: RoomType
-    ): Boolean {
-        return employeePolicy.isBookingAllowed(employeeId, roomType)
-    }
 
     internal class RoomTypePolicy<ItemId> {
 
@@ -65,6 +62,13 @@ class BookingPolicyService(private val belongable: Belongable) {
                 .any { it.item == itemId && it.containsRoomType(roomType) }
         }
 
+        fun hasRuleFor(
+            itemId: ItemId
+        ): Boolean {
+            return policies
+                .any { it.item == itemId }
+        }
+
         private data class RoomTypePolicyItem<ItemId>(
             val item: ItemId,
             val roomTypes: Collection<RoomType>
@@ -73,6 +77,4 @@ class BookingPolicyService(private val belongable: Belongable) {
         }
 
     }
-
-
 }
