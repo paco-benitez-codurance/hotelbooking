@@ -1,7 +1,5 @@
 package hotelbooking
 
-import hotelbooking.errors.CompanyPolicyDuplicated
-import hotelbooking.errors.EmployeePolicyDuplicated
 import hotelbooking.model.CompanyId
 import hotelbooking.model.EmployeeId
 import hotelbooking.model.RoomType
@@ -14,11 +12,11 @@ class BookingPolicyService(private val belongable: Belongable) {
 
 
     fun setCompanyPolicy(companyId: CompanyId, roomTypes: Collection<RoomType>) {
-        if (!companyPolicy.addPolicy(companyId, roomTypes)) throw CompanyPolicyDuplicated()
+        companyPolicy.addPolicy(companyId, roomTypes)
     }
 
     fun setEmployeePolicy(employeeId: EmployeeId, roomTypes: Collection<RoomType>) {
-        if (!employeePolicy.addPolicy(employeeId, roomTypes)) throw EmployeePolicyDuplicated()
+        employeePolicy.addPolicy(employeeId, roomTypes)
     }
 
     fun isBookingAllowed(employeeId: EmployeeId, roomType: RoomType): Boolean {

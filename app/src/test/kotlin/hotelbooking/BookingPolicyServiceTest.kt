@@ -1,13 +1,9 @@
 package hotelbooking
 
-import hotelbooking.errors.CompanyPolicyDuplicated
-import hotelbooking.errors.EmployeePolicyDuplicated
 import hotelbooking.model.CompanyId
 import hotelbooking.model.EmployeeId
 import hotelbooking.model.RoomType
-import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.core.spec.style.FreeSpec
-
 import io.kotest.matchers.shouldBe
 import io.mockk.every
 import io.mockk.mockk
@@ -30,31 +26,9 @@ class BookingPolicyServiceTest : FreeSpec({
     }
 
 
-    "Basic" - {
 
-        "Company policy cannot be duplicated" {
-            val book = {
-                bookingPolicyService.setCompanyPolicy(companyId, roomTypes)
-            }
-            book()
-            shouldThrow<CompanyPolicyDuplicated> {
-                book()
-            }
-        }
-
-        "Employee policy cannot be duplicated" {
-            val book = {
-                bookingPolicyService.setEmployeePolicy(employeeId, roomTypes)
-            }
-            book()
-            shouldThrow<EmployeePolicyDuplicated> {
-                book()
-            }
-        }
-    }
-
-    "if no policy is added should return false" {
-        bookingPolicyService.isBookingAllowed(employeeId, roomType) shouldBe false
+    "if no policy is added should return true" {
+        bookingPolicyService.isBookingAllowed(employeeId, roomType) shouldBe true
     }
 
     "isBookingAllowed with employee policy" - {
@@ -64,10 +38,15 @@ class BookingPolicyServiceTest : FreeSpec({
             bookingPolicyService.isBookingAllowed(employeeId, roomType) shouldBe true
         }
 
-        "if employee policy is added should return true only if is the employee" {
+        "if employee policy is added and ask for other room type should be false" {
+            bookingPolicyService.setEmployeePolicy(employeeId, roomTypes)
+            bookingPolicyService.isBookingAllowed(employeeId, RoomType("another")) shouldBe false
+        }
+
+        "if employee policy for other employee should be true" {
             bookingPolicyService.setEmployeePolicy(employeeId, roomTypes)
             val otherEmployeeId = EmployeeId("other employee")
-            bookingPolicyService.isBookingAllowed(otherEmployeeId, roomType) shouldBe false
+            bookingPolicyService.isBookingAllowed(otherEmployeeId, roomType) shouldBe true
         }
 
         "can have several empoyeeId policy" {
@@ -88,9 +67,10 @@ class BookingPolicyServiceTest : FreeSpec({
     }
 
     "isBookingAllowed with company policy" - {
-        "if company policy is added should return false for an employee that does not belong to the company" {
+
+        "if company policy is added should return true for an employee that does not belong to the company" {
             bookingPolicyService.setCompanyPolicy(companyId, roomTypes)
-            bookingPolicyService.isBookingAllowed(employeeId, roomType) shouldBe false
+            bookingPolicyService.isBookingAllowed(employeeId, roomType) shouldBe true
         }
 
         "if company policy is added should return true for an employee that belongs to the company" {
@@ -99,13 +79,14 @@ class BookingPolicyServiceTest : FreeSpec({
             bookingPolicyService.isBookingAllowed(employeeId, roomType) shouldBe true
         }
 
-        "if company policy is added should return false for an employee that does not belong to the company" {
+        "if company policy is added should return true for an employee that does not belong to the company" {
             bookingPolicyService.setCompanyPolicy(companyId, roomTypes)
             val anotherCompanyId = CompanyId("Another company id")
             every { belongable.company(employeeId) } returns anotherCompanyId
-            bookingPolicyService.isBookingAllowed(employeeId, roomType) shouldBe false
+            bookingPolicyService.isBookingAllowed(employeeId, roomType) shouldBe true
         }
     }
+
     "isBookingAllowed employee and booking policies" - {
         "Employee policy should take preference" {
             val roomTypeForCompany = RoomType("forCompany")
