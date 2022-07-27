@@ -39,14 +39,11 @@ class BookingPolicyService(private val belongable: Belongable) {
             fun <ItemId> empty() = RoomTypePolicy<ItemId>()
         }
 
-        fun addPolicy(itemId: ItemId, roomTypes: Collection<RoomType>): Boolean {
-            if (isPolicyDuplicated(itemId)) return false
-            policies += RoomTypePolicyItem(itemId, roomTypes)
-            return true
-
+        fun addPolicy(itemId: ItemId, roomTypes: Collection<RoomType>) {
+            policies =
+                policies.filter { it.item != itemId }.toTypedArray() +
+                RoomTypePolicyItem(itemId, roomTypes)
         }
-
-        private fun isPolicyDuplicated(itemId: ItemId) = policies.map { it.item }.contains(itemId)
 
         fun isBookingAllowed(
             itemId: ItemId,

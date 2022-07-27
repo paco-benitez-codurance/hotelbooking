@@ -27,9 +27,25 @@ class BookingPolicyServiceTest : FreeSpec({
 
 
 
-    "if no policy is added should return true" {
-        bookingPolicyService.isBookingAllowed(employeeId, roomType) shouldBe true
+    "Basic" - {
+        "if no policy is added should return true" {
+            bookingPolicyService.isBookingAllowed(employeeId, roomType) shouldBe true
+        }
+
+        "Employee policy is updated" {
+            bookingPolicyService.setEmployeePolicy(employeeId, roomTypes)
+            bookingPolicyService.setEmployeePolicy(employeeId, arrayListOf(RoomType("Another")))
+            bookingPolicyService.isBookingAllowed(employeeId, roomType) shouldBe false
+        }
+
+        "Company policy is updated" {
+            bookingPolicyService.setCompanyPolicy(companyId, roomTypes)
+            bookingPolicyService.setCompanyPolicy(companyId, arrayListOf(RoomType("Another")))
+            every { belongable.company(employeeId) } returns companyId
+            bookingPolicyService.isBookingAllowed(employeeId, roomType) shouldBe false
+        }
     }
+
 
     "isBookingAllowed with employee policy" - {
 
@@ -99,10 +115,6 @@ class BookingPolicyServiceTest : FreeSpec({
             every { belongable.company(employeeId) } returns companyId
 
             bookingPolicyService.isBookingAllowed(employeeId, roomTypeForCompany) shouldBe false
-        }
-
-        "If no rules should be allowed to check any room type" {
-            bookingPolicyService.isBookingAllowed(employeeId, roomType) shouldBe true
         }
     }
 })
