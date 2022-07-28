@@ -3,9 +3,9 @@ package hotelbooking
 import hotelbooking.model.CompanyId
 import hotelbooking.model.EmployeeId
 
-class CompanyService: Belongable{
+class CompanyService(val deleteIsDone: (EmployeeId) -> Unit) : Belongable {
 
-    var repo: Map<EmployeeId, CompanyId> = emptyMap()
+    private var repo: Map<EmployeeId, CompanyId> = emptyMap()
 
     fun addEmployee(companyId: CompanyId, employeeId: EmployeeId) {
         if(repo.containsKey(employeeId)) throw DuplicatedEmployee()
@@ -13,10 +13,11 @@ class CompanyService: Belongable{
     }
 
     fun deleteEmployee(employeeId: EmployeeId) {
-        TODO()
+        repo = repo - employeeId
+        deleteIsDone(employeeId)
     }
 
     override fun company(employeeId: EmployeeId): CompanyId? {
-        return repo.get(employeeId)
+        return repo[employeeId]
     }
 }
