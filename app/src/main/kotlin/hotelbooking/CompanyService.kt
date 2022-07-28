@@ -3,16 +3,20 @@ package hotelbooking
 import hotelbooking.model.CompanyId
 import hotelbooking.model.EmployeeId
 
-class CompanyService {
+class CompanyService: Belongable{
+
+    var repo: Map<EmployeeId, CompanyId> = emptyMap()
+
     fun addEmployee(companyId: CompanyId, employeeId: EmployeeId) {
-        TODO()
+        if(repo.containsKey(employeeId)) throw DuplicatedEmployee()
+        repo = repo + Pair(employeeId, companyId)
     }
 
     fun deleteEmployee(employeeId: EmployeeId) {
         TODO()
     }
 
-    fun belongs(employeeId: EmployeeId, companyId: CompanyId): Boolean {
-        TODO("Not yet implemented")
+    override fun company(employeeId: EmployeeId): CompanyId? {
+        return repo.get(employeeId)
     }
 }
