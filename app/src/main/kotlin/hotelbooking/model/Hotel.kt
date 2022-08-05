@@ -1,14 +1,17 @@
 package hotelbooking.model
 
-data class Hotel(val hotelId: HotelId, val numberOfRoom: Int? = null, val roomType: RoomType? = null) {
+data class Hotel(val hotelId: HotelId, val roomTypes: Map<RoomType, Int> = emptyMap()) {
+
+    constructor(hotelId: HotelId, numberOfRoom: Int, roomType: RoomType) : this(
+        hotelId,
+        mapOf(roomType to numberOfRoom)
+    )
+
     fun has(roomType: RoomType): Boolean {
-        return this.roomType == roomType
+        return this.roomTypes.containsKey(roomType)
     }
 
     fun rooms(roomType: RoomType): Int {
-        if(this.roomType != roomType) {
-            return 0
-        }
-        return numberOfRoom ?: 0
+        return this.roomTypes[roomType] ?: 0
     }
 }

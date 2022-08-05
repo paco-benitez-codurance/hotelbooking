@@ -13,7 +13,7 @@ class HotelService {
         if (exists(hotelId)) {
             throw HotelAlreadyExists()
         }
-        this.add(Hotel(hotelId))
+        this.hotels = this.hotels + Hotel(hotelId)
     }
 
 
@@ -21,7 +21,7 @@ class HotelService {
         if (!exists(hotelId)) {
             throw HotelNotFound()
         }
-        this.add(Hotel(hotelId, number, roomType))
+        this.add(hotelId, number, roomType)
     }
 
     fun findHotelBy(hotelId: HotelId): Hotel {
@@ -30,11 +30,14 @@ class HotelService {
 
     private fun hotel(hotelId: HotelId) = hotels.find { it.hotelId == hotelId }
 
-    private fun add(hotel: Hotel) {
-        val remove = this.hotels.filter { it.hotelId != hotel.hotelId }
-        this.hotels = remove + hotel
+    private fun add(hotelId: HotelId, number: Int, roomType: RoomType) {
+        this.hotels = this.hotels.map {
+            if (it.hotelId == hotelId)
+                Hotel( hotelId, it.roomTypes + Pair(roomType, number) )
+            else it
+        }
     }
 
-    private fun exists(hotelId: HotelId) = this.hotels.count{ it.hotelId == hotelId } > 0
+    private fun exists(hotelId: HotelId) = this.hotels.count { it.hotelId == hotelId } > 0
 
 }

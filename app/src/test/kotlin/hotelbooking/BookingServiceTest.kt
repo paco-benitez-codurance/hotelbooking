@@ -1,9 +1,6 @@
 package hotelbooking
 
-import hotelbooking.errors.BookingNotAllowed
-import hotelbooking.errors.HotelNotFound
-import hotelbooking.errors.RoomTypeNotFound
-import hotelbooking.errors.WrongDates
+import hotelbooking.errors.*
 import hotelbooking.model.*
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.core.spec.style.StringSpec
@@ -125,6 +122,22 @@ class BookingServiceTest : StringSpec({
             )
         }
     }
+
+    /*
+    "Booking should only be allowed if there is at least one room type available during the whole booking period" {
+        every { hotelService.findHotelBy(HOTEL_ID) } returns Hotel(HOTEL_ID, mapOf(ROOM_TYPE to 1))
+
+
+        bookingService.book(
+            EMPLOYEE_ID, HOTEL_ID, ROOM_TYPE, CHECKIN_DATE, CHECKOUT_DATE
+        )
+        shouldThrow<NotRoomTypeAvailableForThisPeriod> {
+            bookingService.book(
+                EMPLOYEE_ID, HOTEL_ID, ROOM_TYPE, CHECKIN_DATE, CHECKOUT_DATE
+            )
+        }
+    }
+     */
 
 
 })

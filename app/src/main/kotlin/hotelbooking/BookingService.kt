@@ -1,6 +1,7 @@
 package hotelbooking
 
 import hotelbooking.errors.BookingNotAllowed
+import hotelbooking.errors.NotRoomTypeAvailableForThisPeriod
 import hotelbooking.errors.RoomTypeNotFound
 import hotelbooking.errors.WrongDates
 import hotelbooking.model.Booking
@@ -14,6 +15,9 @@ class BookingService(
     private val hotelService: HotelService,
     private val bookingPolicyService: BookingPolicyService
 ) {
+
+    private var lastBooking: Booking? = null
+
     fun book(
         employeeId: EmployeeId,
         hotelId: HotelId,
@@ -27,8 +31,16 @@ class BookingService(
         if(!bookingPolicyService.isBookingAllowed(employeeId, roomType)) {
             throw BookingNotAllowed()
         }
+        val booking = Booking(employeeId, hotelId, roomType, checkIn, checkOut)
+        validateHasBooked(booking)
+        return booking
+    }
 
-        return Booking(employeeId, hotelId, roomType, checkIn, checkOut)
+    private fun validateHasBooked(booking: Booking) {
+        if (booking == lastBooking) {
+            throw NotRoomTypeAvailableForThisPeriod()
+        }
+        lastBooking = booking
     }
 
     private fun validateHotelAndRoomType(hotelId: HotelId, roomType: RoomType) {

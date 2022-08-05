@@ -106,6 +106,21 @@ class HotelServiceTest : FreeSpec({
 
             hotel.has(roomType) shouldBe true
         }
+
+        "hotel info can have several room types" {
+            val numberOfRooms = 5
+            val roomType1 = RoomType("roomType1")
+            val roomType2 = RoomType("roomType2")
+
+            hotelService.addHotel(hotelId, hotelName)
+            hotelService.setRoom(hotelId, numberOfRooms, roomType1)
+            hotelService.setRoom(hotelId, numberOfRooms, roomType2)
+
+            val hotel = hotelService.findHotelBy(hotelId)
+
+            hotel.has(roomType1) shouldBe true
+            hotel.has(roomType2) shouldBe true
+        }
     }
 
     "Multiple Hotel Management" - {
