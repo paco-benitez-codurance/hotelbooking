@@ -13,11 +13,9 @@ import java.time.LocalDate
 class BookingService(
     private val dateValidator: CheckDateValidator,
     private val hotelService: HotelService,
-    private val bookingPolicyService: BookingPolicyService
+    private val bookingPolicyService: BookingPolicyService,
+    private val bookingRepository: BookingRepository
 ) {
-
-    private var lastBooking: Booking? = null
-
     fun book(
         employeeId: EmployeeId,
         hotelId: HotelId,
@@ -33,14 +31,17 @@ class BookingService(
         }
         val booking = Booking(employeeId, hotelId, roomType, checkIn, checkOut)
         validateHasBooked(booking)
+        bookingRepository.store(booking)
         return booking
     }
 
     private fun validateHasBooked(booking: Booking) {
-        if (booking == lastBooking) {
+        val hotel = hotelService.findHotelBy(booking.hotelId)
+        val numberOfRooms = hotel.rooms(booking.roomType)
+        val numberOfBookedRooms = bookingRepository.occupiedRooms(booking.hotelId, booking.roomType)
+        if(numberOfBookedRooms + 1 > numberOfRooms) {
             throw NotRoomTypeAvailableForThisPeriod()
         }
-        lastBooking = booking
     }
 
     private fun validateHotelAndRoomType(hotelId: HotelId, roomType: RoomType) {

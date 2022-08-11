@@ -33,6 +33,7 @@ class BookingServiceTest : StringSpec({
     val dateValidator = mockk<CheckDateValidator>()
     val hotelService = mockk<HotelService>()
     val bookingPolicyService = mockk<BookingPolicyService>()
+    val bookingRepository = mockk<BookingRepository>()
     lateinit var bookingService: BookingService
 
     fun setupBookingPolicyService() {
@@ -42,6 +43,7 @@ class BookingServiceTest : StringSpec({
     fun setupHotelService() {
         val hotel = mockk<Hotel>()
         every { hotel.has(ROOM_TYPE) } returns true
+        every { hotel.rooms(ROOM_TYPE) } returns 1
         every { hotelService.findHotelBy(HOTEL_ID) } returns hotel
     }
 
@@ -49,12 +51,18 @@ class BookingServiceTest : StringSpec({
         every { dateValidator.isValid(CHECKIN_DATE, CHECKOUT_DATE) }.returns(true)
     }
 
+    fun setupBookingRepository() {
+        every { bookingRepository.store(any()) } returns Unit
+        every { bookingRepository.occupiedRooms(any(), any()) } returns 0
+    }
+
     beforeTest {
         setupDateValidator()
         setupHotelService()
         setupBookingPolicyService()
+        setupBookingRepository()
 
-        bookingService = BookingService(dateValidator, hotelService, bookingPolicyService)
+        bookingService = BookingService(dateValidator, hotelService, bookingPolicyService, bookingRepository)
     }
 
     "Booking should contain a unique ID, employeeId, hotelId, roomType, checkIn and checkOut" {
@@ -123,21 +131,23 @@ class BookingServiceTest : StringSpec({
         }
     }
 
-    /*
-    "Booking should only be allowed if there is at least one room type available during the whole booking period" {
-        every { hotelService.findHotelBy(HOTEL_ID) } returns Hotel(HOTEL_ID, mapOf(ROOM_TYPE to 1))
-
-
-        bookingService.book(
+    "Booking should be stored in BookingRepository" {
+        val booking = bookingService.book(
             EMPLOYEE_ID, HOTEL_ID, ROOM_TYPE, CHECKIN_DATE, CHECKOUT_DATE
         )
+        verify { bookingRepository.store(booking) }
+    }
+
+    "Booking should only be allowed if there is at least one room type available during the whole booking period" {
+        every { hotelService.findHotelBy(HOTEL_ID) } returns Hotel(HOTEL_ID, mapOf(ROOM_TYPE to 1))
+        every { bookingRepository.occupiedRooms(HOTEL_ID, ROOM_TYPE) } returns 1
+
         shouldThrow<NotRoomTypeAvailableForThisPeriod> {
             bookingService.book(
                 EMPLOYEE_ID, HOTEL_ID, ROOM_TYPE, CHECKIN_DATE, CHECKOUT_DATE
             )
         }
     }
-     */
-
 
 })
+
