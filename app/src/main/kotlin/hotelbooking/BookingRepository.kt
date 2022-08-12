@@ -5,12 +5,14 @@ import hotelbooking.model.HotelId
 import hotelbooking.model.RoomType
 
 class BookingRepository {
+    private var bookings: List<Booking> = emptyList()
+
     fun store(booking: Booking) {
-        TODO("Not yet implemented")
+        bookings = bookings + booking
     }
 
     fun occupiedRooms(hotelId: HotelId, roomType: RoomType): Int {
-        TODO("Not yet implemented")
+        return bookings.count { it.hotelId == hotelId && it.roomType == roomType }
     }
 
 }
