@@ -24,11 +24,11 @@ import java.time.LocalDate
 
 class BookingServiceTest : StringSpec({
 
-    val CHECKIN_DATE = LocalDate.of(2022, 1, 1)
-    val CHECKOUT_DATE = LocalDate.of(2022, 1, 5)
-    val EMPLOYEE_ID = EmployeeId("employee id")
-    val HOTEL_ID = HotelId("id1")
-    val ROOM_TYPE = RoomType("Room Type")
+    val checkInDate = LocalDate.of(2022, 1, 1)
+    val checkOutDate = LocalDate.of(2022, 1, 5)
+    val employeeId = EmployeeId("employee id")
+    val hotelId = HotelId("id1")
+    val roomType = RoomType("Room Type")
 
     val dateValidator = mockk<CheckDateValidator>()
     val hotelService = mockk<HotelService>()
@@ -37,18 +37,18 @@ class BookingServiceTest : StringSpec({
     lateinit var bookingService: BookingService
 
     fun setupBookingPolicyService() {
-        every { bookingPolicyService.isBookingAllowed(EMPLOYEE_ID, ROOM_TYPE) } returns true
+        every { bookingPolicyService.isBookingAllowed(employeeId, roomType) } returns true
     }
 
     fun setupHotelService() {
         val hotel = mockk<Hotel>()
-        every { hotel.has(ROOM_TYPE) } returns true
-        every { hotel.rooms(ROOM_TYPE) } returns 1
-        every { hotelService.findHotelBy(HOTEL_ID) } returns hotel
+        every { hotel.has(roomType) } returns true
+        every { hotel.rooms(roomType) } returns 1
+        every { hotelService.findHotelBy(hotelId) } returns hotel
     }
 
     fun setupDateValidator() {
-        every { dateValidator.isValid(CHECKIN_DATE, CHECKOUT_DATE) }.returns(true)
+        every { dateValidator.isValid(checkInDate, checkOutDate) }.returns(true)
     }
 
     fun setupBookingRepository() {
@@ -68,26 +68,26 @@ class BookingServiceTest : StringSpec({
     "Booking should contain a unique ID, employeeId, hotelId, roomType, checkIn and checkOut" {
 
         val booking = bookingService.book(
-            EMPLOYEE_ID, HOTEL_ID, ROOM_TYPE, CHECKIN_DATE, CHECKOUT_DATE
+            employeeId, hotelId, roomType, checkInDate, checkOutDate
         )
 
         booking shouldBe Booking(
-            EMPLOYEE_ID, HOTEL_ID, ROOM_TYPE, CHECKIN_DATE, CHECKOUT_DATE
+            employeeId, hotelId, roomType, checkInDate, checkOutDate
         )
     }
 
     "Exception should be raise when check date fails" {
 
         val wrongDate = mockk<LocalDate>()
-        every { dateValidator.isValid(CHECKIN_DATE, wrongDate) }.returns(false)
+        every { dateValidator.isValid(checkInDate, wrongDate) }.returns(false)
 
         shouldThrow<WrongDates> {
             bookingService.book(
-                EMPLOYEE_ID, HOTEL_ID, ROOM_TYPE, CHECKIN_DATE, wrongDate
+                employeeId, hotelId, roomType, checkInDate, wrongDate
             )
         }
 
-        verify { dateValidator.isValid(CHECKIN_DATE, wrongDate) }
+        verify { dateValidator.isValid(checkInDate, wrongDate) }
     }
 
     "Exception should be raise when hotel is not found" {
@@ -97,19 +97,19 @@ class BookingServiceTest : StringSpec({
 
         shouldThrow<HotelNotFound> {
             bookingService.book(
-                EMPLOYEE_ID, nonExistingHotelId, ROOM_TYPE, CHECKIN_DATE, CHECKOUT_DATE
+                employeeId, nonExistingHotelId, roomType, checkInDate, checkOutDate
             )
         }
     }
 
     "Exception should be raise when room type is not found" {
         val hotel = mockk<Hotel>()
-        every { hotel.has(ROOM_TYPE) } returns false
-        every { hotelService.findHotelBy(HOTEL_ID) } returns hotel
+        every { hotel.has(roomType) } returns false
+        every { hotelService.findHotelBy(hotelId) } returns hotel
 
         shouldThrow<RoomTypeNotFound> {
             bookingService.book(
-                EMPLOYEE_ID, HOTEL_ID, ROOM_TYPE, CHECKIN_DATE, CHECKOUT_DATE
+                employeeId, hotelId, roomType, checkInDate, checkOutDate
             )
         }
     }
@@ -120,31 +120,31 @@ class BookingServiceTest : StringSpec({
 
         val hotel = mockk<Hotel>()
         every { hotel.has(notAllowedType) } returns true
-        every { hotelService.findHotelBy(HOTEL_ID) } returns hotel
+        every { hotelService.findHotelBy(hotelId) } returns hotel
 
-        every { bookingPolicyService.isBookingAllowed(EMPLOYEE_ID, notAllowedType) } returns false
+        every { bookingPolicyService.isBookingAllowed(employeeId, notAllowedType) } returns false
 
         shouldThrow<BookingNotAllowed> {
             bookingService.book(
-                EMPLOYEE_ID, HOTEL_ID, notAllowedType, CHECKIN_DATE, CHECKOUT_DATE
+                employeeId, hotelId, notAllowedType, checkInDate, checkOutDate
             )
         }
     }
 
     "Booking should be stored in BookingRepository" {
         val booking = bookingService.book(
-            EMPLOYEE_ID, HOTEL_ID, ROOM_TYPE, CHECKIN_DATE, CHECKOUT_DATE
+            employeeId, hotelId, roomType, checkInDate, checkOutDate
         )
         verify { bookingRepository.store(booking) }
     }
 
     "Booking should only be allowed if there is at least one room type available during the whole booking period" {
-        every { hotelService.findHotelBy(HOTEL_ID) } returns Hotel(HOTEL_ID, mapOf(ROOM_TYPE to 1))
-        every { bookingRepository.occupiedRooms(HOTEL_ID, ROOM_TYPE) } returns 1
+        every { hotelService.findHotelBy(hotelId) } returns Hotel(hotelId, mapOf(roomType to 1))
+        every { bookingRepository.occupiedRooms(hotelId, roomType) } returns 1
 
         shouldThrow<NotRoomTypeAvailableForThisPeriod> {
             bookingService.book(
-                EMPLOYEE_ID, HOTEL_ID, ROOM_TYPE, CHECKIN_DATE, CHECKOUT_DATE
+                employeeId, hotelId, roomType, checkInDate, checkOutDate
             )
         }
     }
