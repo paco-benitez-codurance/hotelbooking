@@ -53,7 +53,7 @@ class BookingServiceTest : StringSpec({
 
     fun setupBookingRepository() {
         every { bookingRepository.store(any()) } returns Unit
-        every { bookingRepository.occupiedRooms(any(), any()) } returns 0
+        every { bookingRepository.occupiedRooms(any(), any(), checkInDate) } returns 0
     }
 
     beforeTest {
@@ -140,7 +140,7 @@ class BookingServiceTest : StringSpec({
 
     "Booking should only be allowed if there is at least one room type available during the whole booking period" {
         every { hotelService.findHotelBy(hotelId) } returns Hotel(hotelId, mapOf(roomType to 1))
-        every { bookingRepository.occupiedRooms(hotelId, roomType) } returns 1
+        every { bookingRepository.occupiedRooms(hotelId, roomType, checkInDate) } returns 1
 
         shouldThrow<NotRoomTypeAvailableForThisPeriod> {
             bookingService.book(

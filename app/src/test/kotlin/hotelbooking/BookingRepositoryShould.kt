@@ -28,7 +28,7 @@ class BookingRepositoryShould : StringSpec({
         )
         bookingRepository.store(booking)
 
-        bookingRepository.occupiedRooms(hotelId1, roomType) shouldBe 1
+        bookingRepository.occupiedRooms(hotelId1, roomType, checkInDate) shouldBe 1
     }
 
     "should return 0 if no store is done for this roomType " {
@@ -37,7 +37,7 @@ class BookingRepositoryShould : StringSpec({
         )
         bookingRepository.store(booking)
 
-        bookingRepository.occupiedRooms(hotelId1, RoomType("nonstoreroomtype")) shouldBe 0
+        bookingRepository.occupiedRooms(hotelId1, RoomType("nonstoreroomtype"), checkInDate) shouldBe 0
     }
 
     "After store different bookings should return its occupation" {
@@ -52,7 +52,25 @@ class BookingRepositoryShould : StringSpec({
         bookingRepository.store(booking2)
         bookingRepository.store(booking2)
 
-        bookingRepository.occupiedRooms(hotelId1, roomType) shouldBe 1
-        bookingRepository.occupiedRooms(hotelId2, roomType) shouldBe 2
+        bookingRepository.occupiedRooms(hotelId1, roomType, checkInDate) shouldBe 1
+        bookingRepository.occupiedRooms(hotelId2, roomType, checkInDate) shouldBe 2
+    }
+
+    "should return 0 if a booking is same day that other booking ends" {
+        val booking = Booking(
+            employeeId, hotelId1, roomType, checkInDate, checkoutDate
+        )
+        bookingRepository.store(booking)
+
+        bookingRepository.occupiedRooms(hotelId1, roomType, checkoutDate) shouldBe 0
+    }
+
+    "should return 1 if a booking is in the middle that other booking" {
+        val booking = Booking(
+            employeeId, hotelId1, roomType, checkInDate, checkoutDate
+        )
+        bookingRepository.store(booking)
+
+        bookingRepository.occupiedRooms(hotelId1, roomType, checkoutDate.minusDays(2)) shouldBe 1
     }
 })

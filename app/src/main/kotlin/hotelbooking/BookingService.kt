@@ -38,7 +38,11 @@ class BookingService(
     private fun validateHasBooked(booking: Booking) {
         val hotel = hotelService.findHotelBy(booking.hotelId)
         val numberOfRooms = hotel.rooms(booking.roomType)
-        val numberOfBookedRooms = bookingRepository.occupiedRooms(booking.hotelId, booking.roomType)
+        val numberOfBookedRooms = bookingRepository.occupiedRooms(
+            booking.hotelId,
+            booking.roomType,
+            booking.checkIn
+        )
         if(numberOfBookedRooms + 1 > numberOfRooms) {
             throw NotRoomTypeAvailableForThisPeriod()
         }
